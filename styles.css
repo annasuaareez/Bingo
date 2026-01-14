@@ -1,0 +1,43 @@
+body {
+  font-family: Arial;
+  background: #eee;
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+}
+
+.container {
+  background: white;
+  padding: 20px;
+  width: 400px;
+}
+
+input, button {
+  width: 100%;
+  margin: 5px 0;
+  padding: 8px;
+}
+
+.bingo-card {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  margin: 10px 0;
+}
+
+.cell {
+  border: 1px solid #999;
+  height: 40px;
+  text-align: center;
+  line-height: 40px;
+  font-weight: bold;
+}
+
+.empty {
+  background: #ccc;
+}
+
+.cell.marked {
+  background: #4caf50;
+  color: white;
+  text-decoration: line-through;
+}

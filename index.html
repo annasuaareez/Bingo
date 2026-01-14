@@ -2,26 +2,26 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vacaciones</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Bingo</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h1>Posibles destinos</h1>
-  <div class="container">
-    <a href="paises/marruecos.html">
-      <div class="card">
-        <img src="fotos/marruecos/rabat.png" alt="Marruecos">
-        <span>Marruecos</span>
-      </div>
-    </a>
 
-    <a href="paises/italia.html">
-      <div class="card">
-        <img src="fotos/italia/italia.png" alt="Italia">
-        <span>Italia</span>
-      </div>
-    </a>
-  </div>
+<div class="container">
+  <h2>Compra de Cartones</h2>
+
+  <input type="text" id="username" placeholder="Nombre de usuario">
+  <input type="number" id="numCards" placeholder="Número de cartones" min="1">
+  <button onclick="entrar()">Entrar al bingo</button>
+
+  <div id="cards"></div>
+
+  <hr>
+
+  <h3>Acceso Administrador</h3>
+  <button onclick="window.location='admin.html'">Entrar como admin</button>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
