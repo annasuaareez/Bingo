@@ -10,17 +10,18 @@
 <div class="container">
   <h2>Administrador</h2>
 
-  <input type="text" id="adminUser" placeholder="Usuario">
-  <input type="password" id="adminPass" placeholder="Contraseña">
+  <input id="adminUser" placeholder="Usuario">
+  <input id="adminPass" type="password" placeholder="Contraseña">
   <button onclick="loginAdmin()">Entrar</button>
 
-  <div id="adminPanel" style="display:none">
+  <div id="panel" style="display:none">
     <h3>Jugadores</h3>
     <div id="players"></div>
     <button onclick="comenzarPartida()">Comenzar partida</button>
   </div>
 </div>
 
-<script src="script.js"></script>
+<script type="module" src="firebase.js"></script>
+<script type="module" src="script-admin.js"></script>
 </body>
 </html>

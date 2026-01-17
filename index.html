@@ -10,29 +10,22 @@
 <div class="container">
   <h2>Bingo</h2>
 
-  <!-- ACCESO USUARIO -->
   <div id="login">
-    <input type="text" id="username" placeholder="Nombre de usuario">
+    <input id="username" placeholder="Nombre de usuario">
     <button onclick="entrar()">Entrar</button>
   </div>
 
-  <!-- ESPERA -->
   <div id="waiting" style="display:none">
     <h3>Espera a que inicie la partida</h3>
   </div>
 
-  <!-- CARTONES USUARIO -->
   <div id="cards"></div>
 
   <hr>
-
-  <!-- ACCESO ADMIN -->
-  <h4>Acceso Administrador</h4>
-  <button onclick="window.location.href='admin.html'">
-    Entrar como administrador
-  </button>
+  <button onclick="window.location='admin.html'">Administrador</button>
 </div>
 
-<script src="script.js"></script>
+<script type="module" src="firebase.js"></script>
+<script type="module" src="script-user.js"></script>
 </body>
 </html>
