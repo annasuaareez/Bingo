@@ -8,12 +8,16 @@
 <body>
 
 <div class="container">
-  <h2>Admin</h2>
 
-  <input id="adminUser" placeholder="Usuario">
-  <input id="adminPass" type="password" placeholder="Contraseña">
-  <button onclick="loginAdmin()">Entrar</button>
+  <!-- LOGIN ADMIN -->
+  <div id="login">
+    <h2>Admin</h2>
+    <input id="adminUser" placeholder="Usuario">
+    <input id="adminPass" type="password" placeholder="Contraseña">
+    <button onclick="loginAdmin()">Entrar</button>
+  </div>
 
+  <!-- PANEL ADMIN (OCULTO HASTA LOGIN) -->
   <div id="panel" style="display:none">
     <h3>Jugadores</h3>
     <div id="players"></div>
@@ -23,6 +27,7 @@
 
     <button onclick="reiniciar()">Reiniciar partida</button>
   </div>
+
 </div>
 
 <script type="module" src="firebase.js"></script>
