@@ -1,70 +1,60 @@
-import { db } from "./firebase.js";
 import {
-  doc, setDoc, onSnapshot, updateDoc
+  getFirestore,
+  doc,
+  setDoc,
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
-let currentUser = "";
+import { app } from "./firebase.js";
 
-window.entrar = async () => {
-  currentUser = document.getElementById("username").value.trim();
-  if (!currentUser) return alert("Nombre obligatorio");
+const db = getFirestore(app);
+let currentUser = null;
 
-  await setDoc(doc(db, "players", currentUser), {
-    username: currentUser,
-    cartones: {},
+window.entrar = async function () {
+  const username = document.getElementById("username").value.trim();
+  if (!username) {
+    alert("Introduce un nombre de usuario");
+    return;
+  }
+
+  currentUser = username;
+
+  // El usuario entra SIN cartones (los asigna el admin)
+  await setDoc(doc(db, "players", username), {
+    username,
     numCartones: 0,
-    dineroTotal: 0
+    dineroPorCarton: 50000,
+    estado: "espera"
   });
 
   document.getElementById("login").style.display = "none";
   document.getElementById("waiting").style.display = "block";
 
-  onSnapshot(doc(db, "players", currentUser), snap => {
-    const d = snap.data();
-    if (d.cartones && Object.keys(d.cartones).length > 0) {
-      mostrarCartones(Object.values(d.cartones));
+  escucharAsignacion();
+};
+
+function escucharAsignacion() {
+  const ref = doc(db, "players", currentUser);
+
+  onSnapshot(ref, snap => {
+    if (!snap.exists()) return;
+
+    const data = snap.data();
+
+    if (data.numCartones > 0 && data.estado === "jugando") {
+      document.getElementById("waiting").style.display = "none";
+      document.getElementById("game").style.display = "block";
+
+      document.getElementById("info").innerText =
+        `Tienes ${data.numCartones} cartón(es)`;
     }
   });
-
-  onSnapshot(doc(db, "game", "current"), snap => {
-    const g = snap.data();
-    if (g?.lineaCantada)
-      document.getElementById("avisos").innerText =
-        `LÍNEA cantada por ${g.lineaCantada.user}`;
-    if (g?.bingoCantado)
-      document.getElementById("avisos").innerText =
-        `BINGO cantado por ${g.bingoCantado.user}`;
-  });
-};
-
-window.cantarLinea = async () => {
-  await updateDoc(doc(db, "game", "current"), {
-    lineaCantada: { user: currentUser, validada: false }
-  });
-};
-
-window.cantarBingo = async () => {
-  await updateDoc(doc(db, "game", "current"), {
-    bingoCantado: { user: currentUser, validada: false }
-  });
-};
-
-function mostrarCartones(cartones) {
-  const cont = document.getElementById("cards");
-  cont.innerHTML = "";
-  cartones.forEach(card => {
-    const div = document.createElement("div");
-    div.className = "bingo-card";
-    card.flat().forEach(n => {
-      const c = document.createElement("div");
-      c.className = "cell";
-      if (n === null) c.classList.add("empty");
-      else {
-        c.textContent = n;
-        c.onclick = () => c.classList.toggle("marked");
-      }
-      div.appendChild(c);
-    });
-    cont.appendChild(div);
-  });
 }
+
+window.cantarLinea = () => {
+  alert("Has cantado LÍNEA (pendiente de validación)");
+};
+
+window.cantarBingo = () => {
+  alert("Has cantado BINGO (pendiente de validación)");
+};

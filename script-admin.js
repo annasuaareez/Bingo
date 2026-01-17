@@ -1,74 +1,85 @@
-import { db } from "./firebase.js";
 import {
-  doc, onSnapshot, updateDoc, setDoc, collection, getDocs
+  getFirestore,
+  doc,
+  setDoc,
+  updateDoc,
+  collection,
+  onSnapshot,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
+import { app } from "./firebase.js";
+
+const db = getFirestore(app);
+
+// ADMINS PERMITIDOS
 const ADMINS = ["annasuaareez", "loveealchemist"];
-const PASS = "N9q$A2vX7!";
-const PRECIO = 50000;
+const ADMIN_PASS = "admin123";
 
-window.loginAdmin = async () => {
-  const u = adminUser.value;
-  const p = adminPass.value;
-  if (!ADMINS.includes(u) || p !== PASS) return alert("No autorizado");
+window.loginAdmin = async function () {
+  const user = document.getElementById("adminUser").value.trim();
+  const pass = document.getElementById("adminPass").value;
 
-  panel.style.display = "block";
+  if (!ADMINS.includes(user) || pass !== ADMIN_PASS) {
+    alert("Acceso denegado");
+    return;
+  }
 
-  onSnapshot(doc(db, "game", "current"), snap => {
-    const g = snap.data();
-    const v = document.getElementById("validaciones");
-    v.innerHTML = "";
-
-    if (g?.lineaCantada && !g.lineaCantada.validada) {
-      v.innerHTML += `<button onclick="validarLinea('${g.lineaCantada.user}')">
-        Validar Línea de ${g.lineaCantada.user}</button>`;
-    }
-
-    if (g?.bingoCantado && !g.bingoCantado.validada) {
-      v.innerHTML += `<button onclick="validarBingo('${g.bingoCantado.user}')">
-        Validar Bingo de ${g.bingoCantado.user}</button>`;
-    }
+  // Guardar admin en Firestore
+  await setDoc(doc(db, "admins", user), {
+    username: user,
+    conectado: true,
+    lastLogin: serverTimestamp()
   });
+
+  document.getElementById("login").style.display = "none";
+  document.getElementById("panel").style.display = "block";
+
+  escucharJugadores();
 };
 
-window.validarLinea = async user => {
-  const bote = await calcularBote();
-  await setDoc(doc(db, "history", Date.now().toString()), {
-    tipo: "LINEA",
-    user,
-    premio: bote.linea
-  });
-  await updateDoc(doc(db, "game", "current"), {
-    lineaCantada: { user, validada: true }
-  });
-};
+function escucharJugadores() {
+  const cont = document.getElementById("players");
 
-window.validarBingo = async user => {
-  const bote = await calcularBote();
-  await setDoc(doc(db, "history", Date.now().toString()), {
-    tipo: "BINGO",
-    user,
-    premio: bote.bingo
-  });
-  await updateDoc(doc(db, "game", "current"), {
-    bingoCantado: { user, validada: true }
-  });
-};
+  onSnapshot(collection(db, "players"), snapshot => {
+    cont.innerHTML = "";
 
-async function calcularBote() {
-  const snap = await getDocs(collection(db, "players"));
-  let total = 0;
-  snap.forEach(p => total += p.data().dineroTotal);
-  return {
-    linea: total * 0.2,
-    bingo: total * 0.8
-  };
+    snapshot.forEach(docSnap => {
+      const p = docSnap.data();
+
+      const div = document.createElement("div");
+      div.style.border = "1px solid #999";
+      div.style.padding = "8px";
+      div.style.marginBottom = "8px";
+
+      div.innerHTML = `
+        <strong>${p.username}</strong><br>
+        Cartones asignados: ${p.numCartones}<br><br>
+
+        <select id="sel-${p.username}">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+        </select>
+
+        <button onclick="asignarCartones('${p.username}')">
+          Asignar cartones
+        </button>
+      `;
+
+      cont.appendChild(div);
+    });
+  });
 }
 
-window.reiniciar = async () => {
-  await updateDoc(doc(db, "game", "current"), {
-    lineaCantada: null,
-    bingoCantado: null
+window.asignarCartones = async function (username) {
+  const select = document.getElementById(`sel-${username}`);
+  const num = parseInt(select.value);
+
+  await updateDoc(doc(db, "players", username), {
+    numCartones: num,
+    estado: "jugando"
   });
-  alert("Partida reiniciada");
 };
