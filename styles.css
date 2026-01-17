@@ -6,6 +6,23 @@ body {
   margin-top: 40px;
 }
 
+.admin-btn {
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  background: #222;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 14px;
+  z-index: 1000;
+}
+
+.admin-btn:hover {
+  background: #444;
+}
+
 .container {
   background: white;
   padding: 20px;
