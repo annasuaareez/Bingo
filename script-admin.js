@@ -12,20 +12,28 @@ import { app } from "./firebase.js";
 
 const db = getFirestore(app);
 
-// ADMINS PERMITIDOS
+// ADMINS PERMITIDOS (SIEMPRE EN MINÚSCULAS)
 const ADMINS = ["annasuaareez", "loveealchemist"];
 const ADMIN_PASS = "admin123";
 
 window.loginAdmin = async function () {
-  const user = document.getElementById("adminUser").value.trim();
+  // 🔒 NORMALIZAMOS EL USUARIO
+  const rawUser = document.getElementById("adminUser").value;
   const pass = document.getElementById("adminPass").value;
 
-  if (!ADMINS.includes(user) || pass !== ADMIN_PASS) {
-    alert("Acceso denegado");
+  const user = rawUser.trim().toLowerCase();
+
+  if (!ADMINS.includes(user)) {
+    alert("Usuario no autorizado");
     return;
   }
 
-  // Guardar admin en Firestore
+  if (pass !== ADMIN_PASS) {
+    alert("Contraseña incorrecta");
+    return;
+  }
+
+  // ✅ GUARDAR ADMIN EN FIRESTORE (SIEMPRE)
   await setDoc(doc(db, "admins", user), {
     username: user,
     conectado: true,
@@ -41,6 +49,7 @@ window.loginAdmin = async function () {
 function escucharJugadores() {
   const cont = document.getElementById("players");
 
+  // 🔥 TIEMPO REAL (usuarios antes y después)
   onSnapshot(collection(db, "players"), snapshot => {
     cont.innerHTML = "";
 
@@ -54,7 +63,7 @@ function escucharJugadores() {
 
       div.innerHTML = `
         <strong>${p.username}</strong><br>
-        Cartones asignados: ${p.numCartones}<br><br>
+        Cartones asignados: ${p.numCartones || 0}<br><br>
 
         <select id="sel-${p.username}">
           <option value="1">1</option>
