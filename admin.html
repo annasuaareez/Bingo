@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Admin Bingo</title>
-  <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<title>Admin Bingo</title>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
 <div class="container">
-  <h2>Administrador</h2>
+  <h2>Admin</h2>
 
   <input id="adminUser" placeholder="Usuario">
   <input id="adminPass" type="password" placeholder="Contraseña">
@@ -17,7 +17,11 @@
   <div id="panel" style="display:none">
     <h3>Jugadores</h3>
     <div id="players"></div>
-    <button onclick="comenzarPartida()">Comenzar partida</button>
+
+    <h3>Validaciones</h3>
+    <div id="validaciones"></div>
+
+    <button onclick="reiniciar()">Reiniciar partida</button>
   </div>
 </div>
 

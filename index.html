@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Bingo</title>
-  <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<title>Bingo</title>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
@@ -16,13 +16,13 @@
   </div>
 
   <div id="waiting" style="display:none">
-    <h3>Espera a que inicie la partida</h3>
+    <p>Espera a que inicie la partida</p>
+    <button onclick="cantarLinea()">Cantar Línea</button>
+    <button onclick="cantarBingo()">Cantar Bingo</button>
   </div>
 
   <div id="cards"></div>
-
-  <hr>
-  <button onclick="window.location='admin.html'">Administrador</button>
+  <div id="avisos"></div>
 </div>
 
 <script type="module" src="firebase.js"></script>

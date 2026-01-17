@@ -9,7 +9,7 @@ body {
 .container {
   background: white;
   padding: 20px;
-  width: 420px;
+  width: 450px;
 }
 
 input, button {
@@ -45,4 +45,15 @@ input, button {
 .admin-view {
   pointer-events: none;
   opacity: 0.9;
+}
+
+.admin-card-wrapper {
+  margin-bottom: 15px;
+}
+
+.admin-card-title {
+  font-weight: bold;
+  margin: 5px 0;
+  font-size: 14px;
+  color: #333;
 }

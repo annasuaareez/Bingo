@@ -1,107 +1,74 @@
 import { db } from "./firebase.js";
-import { ref, onValue, update, set } from
-  "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+import {
+  doc, onSnapshot, updateDoc, setDoc, collection, getDocs
+} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
 const ADMINS = ["annasuaareez", "loveealchemist"];
 const PASS = "N9q$A2vX7!";
+const PRECIO = 50000;
 
-window.loginAdmin = function () {
-  if (!ADMINS.includes(adminUser.value) || adminPass.value !== PASS)
-    return alert("Acceso denegado");
+window.loginAdmin = async () => {
+  const u = adminUser.value;
+  const p = adminPass.value;
+  if (!ADMINS.includes(u) || p !== PASS) return alert("No autorizado");
 
   panel.style.display = "block";
-  escucharJugadores();
-};
 
-function escucharJugadores() {
-  onValue(ref(db, "players"), snap => {
-    players.innerHTML = "";
-    const data = snap.val() || {};
+  onSnapshot(doc(db, "game", "current"), snap => {
+    const g = snap.data();
+    const v = document.getElementById("validaciones");
+    v.innerHTML = "";
 
-    Object.entries(data).forEach(([user, p]) => {
-      const div = document.createElement("div");
-
-      div.innerHTML = `
-        <strong>${user}</strong>
-        <input type="number" min="1" max="5" value="${p.cards || 1}"
-          onchange="asignar('${user}', this.value)">
-        <div id="c-${user}"></div>
-        <hr>
-      `;
-      players.appendChild(div);
-
-      if (p.cartones)
-        mostrarCartonesAdmin(p.cartones, `c-${user}`, user);
-    });
-  });
-}
-
-window.asignar = function (user, n) {
-  update(ref(db, "players/" + user), { cards: +n });
-};
-
-window.comenzarPartida = function () {
-  onValue(ref(db, "players"), snap => {
-    const data = snap.val();
-    Object.keys(data).forEach(user => {
-      const cartones = {};
-      for (let i = 0; i < data[user].cards; i++) {
-        cartones[i] = generarCarton();
-      }
-      update(ref(db, "players/" + user), { cartones });
-    });
-    set(ref(db, "started"), true);
-  }, { onlyOnce: true });
-};
-
-function generarCarton() {
-  const ranges = [[1,9],[10,19],[20,29],[30,39],[40,49],[50,59],[60,69],[70,79],[80,90]];
-  let card = Array.from({ length: 3 }, () => Array(9).fill(null));
-  let used = new Set();
-
-  for (let col = 0; col < 9; col++) {
-    let nums = [];
-    while (nums.length < 2) {
-      let n = Math.floor(Math.random() *
-        (ranges[col][1] - ranges[col][0] + 1)) + ranges[col][0];
-      if (!used.has(n)) used.add(n), nums.push(n);
+    if (g?.lineaCantada && !g.lineaCantada.validada) {
+      v.innerHTML += `<button onclick="validarLinea('${g.lineaCantada.user}')">
+        Validar Línea de ${g.lineaCantada.user}</button>`;
     }
-    nums.forEach(n => {
-      let r;
-      do { r = Math.floor(Math.random() * 3); }
-      while (card[r][col] !== null);
-      card[r][col] = n;
-    });
-  }
 
-  card.forEach(row => {
-    while (row.filter(n => n !== null).length > 5)
-      row[Math.floor(Math.random() * 9)] = null;
+    if (g?.bingoCantado && !g.bingoCantado.validada) {
+      v.innerHTML += `<button onclick="validarBingo('${g.bingoCantado.user}')">
+        Validar Bingo de ${g.bingoCantado.user}</button>`;
+    }
   });
+};
 
-  return card;
+window.validarLinea = async user => {
+  const bote = await calcularBote();
+  await setDoc(doc(db, "history", Date.now().toString()), {
+    tipo: "LINEA",
+    user,
+    premio: bote.linea
+  });
+  await updateDoc(doc(db, "game", "current"), {
+    lineaCantada: { user, validada: true }
+  });
+};
+
+window.validarBingo = async user => {
+  const bote = await calcularBote();
+  await setDoc(doc(db, "history", Date.now().toString()), {
+    tipo: "BINGO",
+    user,
+    premio: bote.bingo
+  });
+  await updateDoc(doc(db, "game", "current"), {
+    bingoCantado: { user, validada: true }
+  });
+};
+
+async function calcularBote() {
+  const snap = await getDocs(collection(db, "players"));
+  let total = 0;
+  snap.forEach(p => total += p.data().dineroTotal);
+  return {
+    linea: total * 0.2,
+    bingo: total * 0.8
+  };
 }
 
-function mostrarCartonesAdmin(cartones, id, user) {
-  const cont = document.getElementById(id);
-  cont.innerHTML = "";
-
-  Object.values(cartones).forEach((c, i) => {
-    const title = document.createElement("div");
-    title.textContent = `${user} - Cartón ${i + 1}`;
-    title.style.fontWeight = "bold";
-
-    const div = document.createElement("div");
-    div.className = "bingo-card admin-view";
-
-    c.flat().forEach(n => {
-      const cell = document.createElement("div");
-      cell.className = "cell";
-      if (n === null) cell.classList.add("empty");
-      else cell.textContent = n;
-      div.appendChild(cell);
-    });
-
-    cont.append(title, div);
+window.reiniciar = async () => {
+  await updateDoc(doc(db, "game", "current"), {
+    lineaCantada: null,
+    bingoCantado: null
   });
-}
+  alert("Partida reiniciada");
+};
