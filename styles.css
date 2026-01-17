@@ -9,7 +9,7 @@ body {
 .container {
   background: white;
   padding: 20px;
-  width: 400px;
+  width: 420px;
 }
 
 input, button {
@@ -40,4 +40,25 @@ input, button {
   background: #4caf50;
   color: white;
   text-decoration: line-through;
+}
+
+/* ===== ADMIN ===== */
+
+.admin-player {
+  margin-bottom: 20px;
+}
+
+.admin-card-wrapper {
+  margin-bottom: 15px;
+}
+
+.admin-card-title {
+  font-weight: bold;
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.admin-view {
+  pointer-events: none;
+  opacity: 0.9;
 }

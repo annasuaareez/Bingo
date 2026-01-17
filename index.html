@@ -8,18 +8,29 @@
 <body>
 
 <div class="container">
-  <h2>Compra de Cartones</h2>
+  <h2>Bingo</h2>
 
-  <input type="text" id="username" placeholder="Nombre de usuario">
-  <input type="number" id="numCards" placeholder="Número de cartones" min="1">
-  <button onclick="entrar()">Entrar al bingo</button>
+  <!-- ACCESO USUARIO -->
+  <div id="login">
+    <input type="text" id="username" placeholder="Nombre de usuario">
+    <button onclick="entrar()">Entrar</button>
+  </div>
 
+  <!-- ESPERA -->
+  <div id="waiting" style="display:none">
+    <h3>Espera a que inicie la partida</h3>
+  </div>
+
+  <!-- CARTONES USUARIO -->
   <div id="cards"></div>
 
   <hr>
 
-  <h3>Acceso Administrador</h3>
-  <button onclick="window.location='admin.html'">Entrar como admin</button>
+  <!-- ACCESO ADMIN -->
+  <h4>Acceso Administrador</h4>
+  <button onclick="window.location.href='admin.html'">
+    Entrar como administrador
+  </button>
 </div>
 
 <script src="script.js"></script>
