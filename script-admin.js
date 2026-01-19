@@ -16,6 +16,7 @@ const db = getFirestore(app);
 const ADMINS = ["annasuaareez", "loveealchemist"];
 const ADMIN_PASS = "admin123";
 
+// LOGIN ADMIN
 window.loginAdmin = async function () {
   const rawUser = document.getElementById("adminUser").value;
   const pass = document.getElementById("adminPass").value;
@@ -45,38 +46,10 @@ window.loginAdmin = async function () {
   escucharJugadores();
 };
 
-window.iniciarPartida = async function () {
-  const snapshot = await getDocs(collection(db, "players"));
-
-  snapshot.forEach(async (docSnap) => {
-    const p = docSnap.data();
-
-    // Solo jugadores activos en espera
-    if (p.estado === "espera" || p.estado === "jugando") {
-      const numCartones = p.numCartones || 1;
-
-      // Generar los cartones
-      const cartones = [];
-      for (let i = 0; i < numCartones; i++) {
-        cartones.push(generarCarton());
-      }
-
-      // Actualizar jugador en Firestore
-      await updateDoc(doc(db, "players", p.username), {
-        cartones: cartones,
-        estado: "jugando"
-      });
-    }
-  });
-
-  alert("Partida iniciada: los jugadores activos ahora reciben sus cartones");
-};
-
-
+// GENERAR CARTÓN
 function generarCarton() {
   const ranges = [
-    [1, 9],[10,19],[20,29],[30,39],
-    [40,49],[50,59],[60,69],[70,79],[80,90]
+    [1, 9],[10,19],[20,29],[30,39]
   ];
 
   let card = Array.from({ length: 3 }, () => Array(9).fill(null));
@@ -108,6 +81,7 @@ function generarCarton() {
   return card;
 }
 
+// ESCUCHAR JUGADORES EN TIEMPO REAL
 function escucharJugadores() {
   const cont = document.getElementById("players");
 
@@ -141,19 +115,74 @@ function escucharJugadores() {
   });
 }
 
+// ASIGNAR CARTONES (actualiza numCartones)
 window.asignarCartones = async function(username) {
   const select = document.getElementById(`sel-${username}`);
   const num = parseInt(select.value);
 
-  // Generar los cartones automáticamente
-  const cartones = [];
-  for (let i = 0; i < num; i++) {
-    cartones.push(generarCarton());
-  }
-
   await updateDoc(doc(db, "players", username), {
     numCartones: num,
-    estado: "jugando",
-    cartones: cartones
+    estado: "espera" // Mantener en espera hasta iniciar partida
   });
 };
+
+// INICIAR PARTIDA (generar cartones y cambiar estado)
+window.iniciarPartida = async function() {
+  const snapshot = await getDocs(collection(db, "players"));
+
+  snapshot.forEach(async (docSnap) => {
+    const p = docSnap.data();
+
+    if ((p.estado === "espera" || p.estado === "jugando") && p.numCartones > 0) {
+      const cartones = [];
+      for (let i = 0; i < p.numCartones; i++) {
+        cartones.push(generarCarton());
+      }
+
+      await updateDoc(doc(db, "players", p.username), {
+        cartones: cartones,
+        estado: "jugando"
+      });
+    }
+  });
+
+  alert("Partida iniciada: los jugadores activos ahora reciben sus cartones");
+
+  // INICIAR BOMBO DE NÚMEROS
+  mostrarNumeros();
+};
+
+// BOMBO DE NÚMEROS (1-39 aleatorio, 2 seg cada número, sin repetir)
+async function mostrarNumeros() {
+  const todosNumeros = Array.from({length: 39}, (_, i) => i + 1);
+  let numerosDisponibles = [...todosNumeros];
+
+  const cont = document.getElementById("numero-cantado");
+
+  for (let i = 0; i < 39; i++) {
+    if (numerosDisponibles.length === 0) break;
+
+    const index = Math.floor(Math.random() * numerosDisponibles.length);
+    const numero = numerosDisponibles[index];
+    numerosDisponibles.splice(index, 1);
+
+    cont.textContent = numero;
+
+    await new Promise(res => setTimeout(res, 2000));
+
+    cont.textContent = "";
+  }
+
+  cont.textContent = "Bingo terminado";
+
+  // CAMBIAR ESTADO DE USUARIOS A FINALIZADO
+  const snapshot = await getDocs(collection(db, "players"));
+  snapshot.forEach(async (docSnap) => {
+    const p = docSnap.data();
+    if (p.estado === "jugando") {
+      await updateDoc(doc(db, "players", p.username), {
+        estado: "finalizado"
+      });
+    }
+  });
+}
