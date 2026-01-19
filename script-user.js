@@ -19,12 +19,12 @@ window.entrar = async function () {
 
   currentUser = username;
 
-  // El usuario entra SIN cartones (los asigna el admin)
+  // Guardar usuario en Firestore sin cartones todavía
   await setDoc(doc(db, "players", username), {
     username,
     numCartones: 0,
-    dineroPorCarton: 50000,
-    estado: "espera"
+    estado: "espera",
+    dineroPorCarton: 50000
   });
 
   document.getElementById("login").style.display = "none";
@@ -38,7 +38,6 @@ function escucharAsignacion() {
 
   onSnapshot(ref, snap => {
     if (!snap.exists()) return;
-
     const data = snap.data();
 
     if (data.numCartones > 0 && data.estado === "jugando") {
@@ -47,14 +46,35 @@ function escucharAsignacion() {
 
       document.getElementById("info").innerText =
         `Tienes ${data.numCartones} cartón(es)`;
+
+      // Mostrar los cartones
+      mostrarCartones(data.cartones);
     }
   });
 }
 
-window.cantarLinea = () => {
-  alert("Has cantado LÍNEA (pendiente de validación)");
-};
+function mostrarCartones(cartones) {
+  const cont = document.getElementById("cards");
+  cont.innerHTML = "";
 
-window.cantarBingo = () => {
-  alert("Has cantado BINGO (pendiente de validación)");
-};
+  cartones.forEach(card => {
+    const div = document.createElement("div");
+    div.className = "bingo-card";
+
+    card.flat().forEach(n => {
+      const c = document.createElement("div");
+      c.className = "cell";
+      if (n === null) c.classList.add("empty");
+      else c.textContent = n;
+
+      c.addEventListener("click", () => c.classList.toggle("marked"));
+
+      div.appendChild(c);
+    });
+
+    cont.appendChild(div);
+  });
+}
+
+window.cantarLinea = () => alert("Has cantado LÍNEA (pendiente de validación)");
+window.cantarBingo = () => alert("Has cantado BINGO (pendiente de validación)");
