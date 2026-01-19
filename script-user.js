@@ -19,8 +19,7 @@ window.entrar = async function() {
     await setDoc(userRef, {
       username: currentUser,
       numCartones: 0,
-      estado: "espera",
-      cartones: []
+      estado: "espera"
     });
   } else {
     // Si ya existía, aseguramos que esté en espera
