@@ -57,6 +57,7 @@ function generarCarton() {
         nums.push(n);
       }
     }
+
     nums.forEach(n => {
       let row;
       do {
@@ -72,11 +73,11 @@ function generarCarton() {
     }
   });
 
-  // 🔥 DEVOLVER OBJETO, NO ARRAY
+  // 🔥 SOLO OBJETOS
   return {
-    fila1: card[0],
-    fila2: card[1],
-    fila3: card[2]
+    f1: card[0],
+    f2: card[1],
+    f3: card[2]
   };
 }
 
@@ -131,23 +132,24 @@ window.iniciarPartida = async function () {
 
   for (const docSnap of snapshot.docs) {
     const p = docSnap.data();
-    const playerDoc = doc(db, "players", docSnap.id); // ✅ ID REAL
 
     if ((p.estado === "espera" || p.estado === "jugando") && p.numCartones > 0) {
       const cartones = [];
+
       for (let i = 0; i < p.numCartones; i++) {
-        cartones.push(generarCarton());
+        cartones.push(generarCarton()); // ← objeto
       }
 
-      await updateDoc(playerDoc, {
+      await updateDoc(doc(db, "players", docSnap.id), {
         estado: "jugando",
         cartones: cartones
       });
     }
   }
 
-  alert("Partida iniciada: los jugadores activos ahora reciben sus cartones");
+  alert("Partida iniciada");
 };
+
 
 // BOMBO DE NÚMEROS
 async function mostrarNumeros(){
