@@ -41,8 +41,9 @@ window.loginAdmin = async function () {
 // GENERAR CARTÓN
 function generarCarton() {
   const ranges = [
-    [1, 9],[10,19],[20,29],[30,39]
-  ];
+  [1,9],[10,19],[20,29],[30,39],
+  [40,49],[50,59],[60,69],[70,79],[80,90]
+];
 
   let card = Array.from({ length: 3 }, () => Array(9).fill(null));
   let used = new Set();
@@ -116,12 +117,12 @@ window.asignarCartones = async function(username) {
 };
 
 // INICIAR PARTIDA
-window.iniciarPartida = async function() {
+window.iniciarPartida = async function () {
   const snapshot = await getDocs(collection(db, "players"));
 
-  snapshot.forEach(async (docSnap) => {
+  for (const docSnap of snapshot.docs) {
     const p = docSnap.data();
-    const playerDoc = doc(db, "players", p.username.toLowerCase()); // 🔑 ID exacto
+    const playerDoc = doc(db, "players", docSnap.id); // ✅ ID REAL
 
     if ((p.estado === "espera" || p.estado === "jugando") && p.numCartones > 0) {
       const cartones = [];
@@ -134,7 +135,7 @@ window.iniciarPartida = async function() {
         cartones: cartones
       });
     }
-  });
+  }
 
   alert("Partida iniciada: los jugadores activos ahora reciben sus cartones");
 };
