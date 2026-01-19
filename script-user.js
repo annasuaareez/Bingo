@@ -37,8 +37,10 @@ window.entrar = async function() {
   // Escuchar cambios
   onSnapshot(userRef, docSnap => {
     const data = docSnap.data();
-    if (data && data.cartones && data.cartones.length > 0 && data.estado === "jugando") {
-      // Redirigir a la página de juego con su nombre de usuario como parámetro
+    if (!data) return;
+
+    // ✅ REDIRECCIONAR SOLO CON ESTADO "jugando"
+    if (data.estado === "jugando") {
       window.location = `game.html?user=${currentUser}`;
     }
   });
