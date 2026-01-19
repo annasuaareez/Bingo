@@ -119,26 +119,19 @@ window.asignarCartones = async function(username) {
 window.iniciarPartida = async function() {
   const snapshot = await getDocs(collection(db, "players"));
 
-  // Primero poner estado "jugando"
   snapshot.forEach(async (docSnap) => {
     const p = docSnap.data();
-    if ((p.estado === "espera" || p.estado === "jugando") && p.numCartones > 0) {
-      await updateDoc(doc(db, "players", p.username), {
-        estado: "jugando"
-      });
-    }
-  });
 
-  // Ahora generar cartones
-  snapshot.forEach(async (docSnap) => {
-    const p = docSnap.data();
     if ((p.estado === "espera" || p.estado === "jugando") && p.numCartones > 0) {
+      // Generar los cartones
       const cartones = [];
       for (let i = 0; i < p.numCartones; i++) {
         cartones.push(generarCarton());
       }
 
+      // 🔑 Un solo updateDoc: asignar cartones y cambiar estado
       await updateDoc(doc(db, "players", p.username), {
+        estado: "jugando",
         cartones: cartones
       });
     }
@@ -146,6 +139,7 @@ window.iniciarPartida = async function() {
 
   alert("Partida iniciada: los jugadores activos ahora reciben sus cartones");
 
+  // Iniciar bombo de números
   mostrarNumeros();
 };
 
