@@ -45,6 +45,34 @@ window.loginAdmin = async function () {
   escucharJugadores();
 };
 
+window.iniciarPartida = async function () {
+  const snapshot = await getDocs(collection(db, "players"));
+
+  snapshot.forEach(async (docSnap) => {
+    const p = docSnap.data();
+
+    // Solo jugadores activos en espera
+    if (p.estado === "espera" || p.estado === "jugando") {
+      const numCartones = p.numCartones || 1;
+
+      // Generar los cartones
+      const cartones = [];
+      for (let i = 0; i < numCartones; i++) {
+        cartones.push(generarCarton());
+      }
+
+      // Actualizar jugador en Firestore
+      await updateDoc(doc(db, "players", p.username), {
+        cartones: cartones,
+        estado: "jugando"
+      });
+    }
+  });
+
+  alert("Partida iniciada: los jugadores activos ahora reciben sus cartones");
+};
+
+
 function generarCarton() {
   const ranges = [
     [1, 9],[10,19],[20,29],[30,39],
