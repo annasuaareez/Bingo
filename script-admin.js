@@ -41,9 +41,9 @@ window.loginAdmin = async function () {
 // GENERAR CARTÓN
 function generarCarton() {
   const ranges = [
-  [1,9],[10,19],[20,29],[30,39],
-  [40,49],[50,59],[60,69],[70,79],[80,90]
-];
+    [1,9],[10,19],[20,29],[30,39],
+    [40,49],[50,59],[60,69],[70,79],[80,90]
+  ];
 
   let card = Array.from({ length: 3 }, () => Array(9).fill(null));
   let used = new Set();
@@ -51,24 +51,33 @@ function generarCarton() {
   for (let col = 0; col < 9; col++) {
     let nums = [];
     while (nums.length < 2) {
-      let n = Math.floor(Math.random() * (ranges[col][1]-ranges[col][0]+1)) + ranges[col][0];
-      if (!used.has(n)) { used.add(n); nums.push(n); }
+      let n = Math.floor(Math.random() * (ranges[col][1] - ranges[col][0] + 1)) + ranges[col][0];
+      if (!used.has(n)) {
+        used.add(n);
+        nums.push(n);
+      }
     }
     nums.forEach(n => {
       let row;
-      do { row = Math.floor(Math.random()*3); } while (card[row][col]!==null);
+      do {
+        row = Math.floor(Math.random() * 3);
+      } while (card[row][col] !== null);
       card[row][col] = n;
     });
   }
 
   card.forEach(row => {
-    while (row.filter(n => n!==null).length>5) {
-      let i = Math.floor(Math.random()*9);
-      row[i]=null;
+    while (row.filter(n => n !== null).length > 5) {
+      row[Math.floor(Math.random() * 9)] = null;
     }
   });
 
-  return card;
+  // 🔥 DEVOLVER OBJETO, NO ARRAY
+  return {
+    fila1: card[0],
+    fila2: card[1],
+    fila3: card[2]
+  };
 }
 
 // ESCUCHAR JUGADORES
