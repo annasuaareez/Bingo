@@ -12,24 +12,17 @@
 
 <div class="container">
 
-  <!-- LOGIN USUARIO -->
-  <div id="login">
-    <h2>Bingo</h2>
-    <input id="username" placeholder="Nombre de usuario">
+  <!-- Login de usuario -->
+  <div class="container" id="login-container">
+    <h2>Ingresar al Bingo</h2>
+    <input type="text" id="username" placeholder="Nombre de usuario">
     <button onclick="entrar()">Entrar</button>
   </div>
 
-  <!-- ESPERA HASTA ASIGNAR CARTONES -->
-  <div id="waiting" style="display:none">
-    <p>Espera a que inicie la partida</p>
-    <button onclick="cantarLinea()">Cantar Línea</button>
-    <button onclick="cantarBingo()">Cantar Bingo</button>
-  </div>
-
-  <!-- JUEGO -->
-  <div id="game" style="display:none">
-    <h3 id="info"></h3>
-    <div id="cards"></div>
+  <!-- Pantalla de espera -->
+  <div class="container" id="loading-container" style="display:none">
+    <h2>Espera a que el administrador inicie la partida</h2>
+    <div class="loader"></div>
   </div>
 
 </div>

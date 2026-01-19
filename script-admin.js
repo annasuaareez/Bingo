@@ -5,9 +5,9 @@ import {
   updateDoc,
   collection,
   onSnapshot,
+  getDocs,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
-
 import { app } from "./firebase.js";
 
 const db = getFirestore(app);
@@ -20,18 +20,10 @@ const ADMIN_PASS = "admin123";
 window.loginAdmin = async function () {
   const rawUser = document.getElementById("adminUser").value;
   const pass = document.getElementById("adminPass").value;
-
   const user = rawUser.trim().toLowerCase();
 
-  if (!ADMINS.includes(user)) {
-    alert("Usuario no autorizado");
-    return;
-  }
-
-  if (pass !== ADMIN_PASS) {
-    alert("Contraseña incorrecta");
-    return;
-  }
+  if (!ADMINS.includes(user)) return alert("Usuario no autorizado");
+  if (pass !== ADMIN_PASS) return alert("Contraseña incorrecta");
 
   // Guardar admin en Firestore
   await setDoc(doc(db, "admins", user), {
@@ -58,46 +50,44 @@ function generarCarton() {
   for (let col = 0; col < 9; col++) {
     let nums = [];
     while (nums.length < 2) {
-      let n = Math.floor(Math.random() * (ranges[col][1] - ranges[col][0] + 1)) + ranges[col][0];
-      if (!used.has(n)) {
-        used.add(n);
-        nums.push(n);
-      }
+      let n = Math.floor(Math.random() * (ranges[col][1]-ranges[col][0]+1)) + ranges[col][0];
+      if (!used.has(n)) { used.add(n); nums.push(n); }
     }
     nums.forEach(n => {
       let row;
-      do { row = Math.floor(Math.random() * 3); } while (card[row][col] !== null);
+      do { row = Math.floor(Math.random()*3); } while (card[row][col]!==null);
       card[row][col] = n;
     });
   }
 
   card.forEach(row => {
-    while (row.filter(n => n !== null).length > 5) {
-      let i = Math.floor(Math.random() * 9);
-      row[i] = null;
+    while (row.filter(n => n!==null).length>5) {
+      let i = Math.floor(Math.random()*9);
+      row[i]=null;
     }
   });
 
   return card;
 }
 
-// ESCUCHAR JUGADORES EN TIEMPO REAL
+// ESCUCHAR JUGADORES
 function escucharJugadores() {
   const cont = document.getElementById("players");
 
   onSnapshot(collection(db, "players"), snapshot => {
     cont.innerHTML = "";
-
     snapshot.forEach(docSnap => {
       const p = docSnap.data();
+      if (p.estado==="finalizado") return;
+
       const div = document.createElement("div");
-      div.style.border = "1px solid #999";
-      div.style.padding = "8px";
-      div.style.marginBottom = "8px";
+      div.style.border="1px solid #999";
+      div.style.padding="8px";
+      div.style.marginBottom="8px";
 
       div.innerHTML = `
         <strong>${p.username}</strong><br>
-        Cartones asignados: ${p.numCartones || 0}<br><br>
+        Cartones asignados: ${p.numCartones||0}<br><br>
 
         <select id="sel-${p.username}">
           <option value="1">1</option>
@@ -115,74 +105,61 @@ function escucharJugadores() {
   });
 }
 
-// ASIGNAR CARTONES (actualiza numCartones)
+// ASIGNAR CARTONES
 window.asignarCartones = async function(username) {
   const select = document.getElementById(`sel-${username}`);
   const num = parseInt(select.value);
-
   await updateDoc(doc(db, "players", username), {
     numCartones: num,
-    estado: "espera" // Mantener en espera hasta iniciar partida
+    estado: "espera"
   });
 };
 
-// INICIAR PARTIDA (generar cartones y cambiar estado)
+// INICIAR PARTIDA
 window.iniciarPartida = async function() {
   const snapshot = await getDocs(collection(db, "players"));
-
-  snapshot.forEach(async (docSnap) => {
-    const p = docSnap.data();
-
-    if ((p.estado === "espera" || p.estado === "jugando") && p.numCartones > 0) {
-      const cartones = [];
-      for (let i = 0; i < p.numCartones; i++) {
-        cartones.push(generarCarton());
-      }
-
-      await updateDoc(doc(db, "players", p.username), {
+  snapshot.forEach(async (docSnap)=>{
+    const p=docSnap.data();
+    if ((p.estado==="espera"||p.estado==="jugando") && p.numCartones>0){
+      const cartones=[];
+      for (let i=0;i<p.numCartones;i++){ cartones.push(generarCarton()); }
+      await updateDoc(doc(db,"players",p.username),{
         cartones: cartones,
-        estado: "jugando"
+        estado:"jugando"
       });
     }
   });
 
   alert("Partida iniciada: los jugadores activos ahora reciben sus cartones");
 
-  // INICIAR BOMBO DE NÚMEROS
   mostrarNumeros();
 };
 
-// BOMBO DE NÚMEROS (1-39 aleatorio, 2 seg cada número, sin repetir)
-async function mostrarNumeros() {
-  const todosNumeros = Array.from({length: 39}, (_, i) => i + 1);
-  let numerosDisponibles = [...todosNumeros];
+// BOMBO DE NÚMEROS
+async function mostrarNumeros(){
+  const todosNumeros=Array.from({length:39},(_,i)=>i+1);
+  let numerosDisponibles=[...todosNumeros];
+  const cont=document.getElementById("numero-cantado");
 
-  const cont = document.getElementById("numero-cantado");
+  for(let i=0;i<39;i++){
+    if(numerosDisponibles.length===0) break;
+    const index=Math.floor(Math.random()*numerosDisponibles.length);
+    const numero=numerosDisponibles[index];
+    numerosDisponibles.splice(index,1);
 
-  for (let i = 0; i < 39; i++) {
-    if (numerosDisponibles.length === 0) break;
-
-    const index = Math.floor(Math.random() * numerosDisponibles.length);
-    const numero = numerosDisponibles[index];
-    numerosDisponibles.splice(index, 1);
-
-    cont.textContent = numero;
-
-    await new Promise(res => setTimeout(res, 2000));
-
-    cont.textContent = "";
+    cont.textContent=numero;
+    await new Promise(res=>setTimeout(res,2000));
+    cont.textContent="";
   }
 
-  cont.textContent = "Bingo terminado";
+  cont.textContent="Bingo terminado";
 
-  // CAMBIAR ESTADO DE USUARIOS A FINALIZADO
-  const snapshot = await getDocs(collection(db, "players"));
-  snapshot.forEach(async (docSnap) => {
-    const p = docSnap.data();
-    if (p.estado === "jugando") {
-      await updateDoc(doc(db, "players", p.username), {
-        estado: "finalizado"
-      });
+  // Cambiar estado a finalizado
+  const snapshot=await getDocs(collection(db,"players"));
+  snapshot.forEach(async docSnap=>{
+    const p=docSnap.data();
+    if(p.estado==="jugando"){
+      await updateDoc(doc(db,"players",p.username),{estado:"finalizado"});
     }
   });
 }
