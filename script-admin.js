@@ -141,8 +141,7 @@ window.iniciarPartida = async function () {
       }
 
       await updateDoc(doc(db, "players", docSnap.id), {
-        estado: "jugando",
-        cartones: cartones
+        estado: "jugando"
       });
     }
   }
