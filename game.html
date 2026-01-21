@@ -1,39 +1,28 @@
-import { getFirestore, doc, setDoc, getDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
-import { app } from "./firebase.js";
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Bingo – Juego</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-const db = getFirestore(app);
-let currentUser = "";
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
 
-// Entrar
-window.entrar = async function() {
-  const user = document.getElementById("username").value.trim();
-  if (!user) return alert("Introduce un nombre de usuario");
+  <div class="container" id="game-container">
+    <h1>Bingo</h1>
 
-  currentUser = user.toLowerCase();
+    <p id="player-name"></p>
 
-  // Guardar usuario en Firestore si no existe
-  const userRef = doc(db, "players", currentUser);
-  const snap = await getDoc(userRef);
+    <div id="cartones-container"></div>
 
-  if (!snap.exists()) {
-    await setDoc(userRef, {
-      username: currentUser,
-      numCartones: 0,
-      estado: "espera",
-      cartones: []
-    });
-  }
+    <div id="numero-cantado" class="numero-cantado"></div>
 
-  // Mostrar loader
-  document.getElementById("login-container").style.display = "none";
-  document.getElementById("loading-container").style.display = "block";
+    <button id="btn-linea" disabled>Línea</button>
+    <button id="btn-bingo" disabled>Bingo</button>
+  </div>
 
-  // Escuchar cambios
-  onSnapshot(userRef, docSnap => {
-    const data = docSnap.data();
-    if (data && data.cartones && data.cartones.length > 0 && data.estado === "jugando") {
-      // Redirigir a la página de juego con su nombre de usuario como parámetro
-      window.location = `game.html?user=${currentUser}`;
-    }
-  });
-};
+  <!-- SCRIPT DEL JUEGO -->
+  <script type="module" src="script-game.js"></script>
+</body>
+</html>
