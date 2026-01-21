@@ -51,28 +51,46 @@ input, button {
   padding: 8px;
 }
 
-.bingo-card {
+.carton {
+  display: inline-block;
+  border: 3px solid #2c7be5;
+  border-radius: 6px;
+  padding: 6px;
+  margin: 10px;
+  background: #f8fbff;
+}
+
+.fila {
   display: grid;
   grid-template-columns: repeat(9, 1fr);
-  margin: 10px 0;
 }
 
-.cell {
-  border: 1px solid #999;
+.celda {
+  width: 40px;
   height: 40px;
-  line-height: 40px;
-  text-align: center;
+  border: 1px solid #2c7be5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-weight: bold;
+  font-size: 15px;
+  cursor: pointer;
+  background: white;
 }
 
-.empty {
-  background: #ccc;
+.celda.vacia {
+  background: #e9ecef;
+  cursor: default;
 }
 
-.cell.marked {
-  background: #4caf50;
+.celda.marcada {
+  background: #28a745;
   color: white;
-  text-decoration: line-through;
+}
+
+.numero-cantado {
+  font-size: 48px;
+  margin: 20px;
 }
 
 .admin-view {

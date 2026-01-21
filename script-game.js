@@ -73,23 +73,13 @@ function generarCarton() {
 // =======================
 // PINTAR CARTONES
 // =======================
-function pintarCartones(cartones) {
+function pintarCartones(cartones, marcados = {}) {
   const cont = document.getElementById("cartones-container");
-
-  if (!cont) {
-    console.error("❌ No existe #cartones-container");
-    return;
-  }
-
   cont.innerHTML = "";
 
-  cartones.forEach((carton, index) => {
+  cartones.forEach((carton, ci) => {
     const div = document.createElement("div");
     div.className = "carton";
-
-    const titulo = document.createElement("h3");
-    titulo.textContent = `Cartón ${index + 1}`;
-    div.appendChild(titulo);
 
     ["f1", "f2", "f3"].forEach(fila => {
       const row = document.createElement("div");
@@ -97,8 +87,27 @@ function pintarCartones(cartones) {
 
       carton[fila].forEach(num => {
         const cell = document.createElement("div");
-        cell.className = "celda";
-        cell.textContent = num ?? "";
+
+        if (num === null) {
+          cell.className = "celda vacia";
+        } else {
+          cell.className = "celda";
+          cell.textContent = num;
+
+          if (marcados[num]) {
+            cell.classList.add("marcada");
+          }
+
+          cell.addEventListener("click", async () => {
+            const marcado = !marcados[num];
+            marcados[num] = marcado;
+
+            cell.classList.toggle("marcada", marcado);
+
+            await guardarMarcados(marcados);
+          });
+        }
+
         row.appendChild(cell);
       });
 
