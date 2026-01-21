@@ -35,11 +35,8 @@ window.entrar = async function() {
     const data = docSnap.data();
     if (!data) return;
 
-    // 🔑 Si admin inició partida, redirigir inmediatamente
     if (data.estado === "jugando") {
-      // ocultar loader antes de redirigir
       document.getElementById("loading-container").style.display = "none";
-      // Redirigir a la página de juego con el usuario
       window.location.href = `game.html?user=${currentUser}`;
     }
   });
