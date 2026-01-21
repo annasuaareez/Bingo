@@ -1,3 +1,5 @@
+console.log("script-game.js cargado correctamente");
+
 import {
   getFirestore,
   doc,
@@ -10,14 +12,18 @@ import { app } from "./firebase.js";
 const db = getFirestore(app);
 
 // =======================
+// ESPERAR AL DOM
+// =======================
+document.addEventListener("DOMContentLoaded", () => {
+  iniciarJuego();
+});
+
+// =======================
 // OBTENER USUARIO DE URL
 // =======================
-const params = new URLSearchParams(window.location.search);
-const currentUser = params.get("user");
-
-if (!currentUser) {
-  alert("Usuario no válido");
-  throw new Error("No user");
+function getCurrentUser() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("user");
 }
 
 // =======================
@@ -25,8 +31,8 @@ if (!currentUser) {
 // =======================
 function generarCarton() {
   const ranges = [
-    [1, 9],[10,19],[20,29],[30,39],
-    [40,49],[50,59],[60,69],[70,79],[80,90]
+    [1, 9], [10, 19], [20, 29], [30, 39],
+    [40, 49], [50, 59], [60, 69], [70, 79], [80, 90]
   ];
 
   let card = Array.from({ length: 3 }, () => Array(9).fill(null));
@@ -35,7 +41,7 @@ function generarCarton() {
   for (let col = 0; col < 9; col++) {
     let nums = [];
     while (nums.length < 2) {
-      let n = Math.floor(Math.random() * (ranges[col][1] - ranges[col][0] + 1)) + ranges[col][0];
+      const n = Math.floor(Math.random() * (ranges[col][1] - ranges[col][0] + 1)) + ranges[col][0];
       if (!used.has(n)) {
         used.add(n);
         nums.push(n);
@@ -69,13 +75,21 @@ function generarCarton() {
 // =======================
 function pintarCartones(cartones) {
   const cont = document.getElementById("cartones-container");
+
+  if (!cont) {
+    console.error("❌ No existe #cartones-container");
+    return;
+  }
+
   cont.innerHTML = "";
 
-  cartones.forEach((carton, i) => {
+  cartones.forEach((carton, index) => {
     const div = document.createElement("div");
     div.className = "carton";
 
-    div.innerHTML = `<h3>Cartón ${i + 1}</h3>`;
+    const titulo = document.createElement("h3");
+    titulo.textContent = `Cartón ${index + 1}`;
+    div.appendChild(titulo);
 
     ["f1", "f2", "f3"].forEach(fila => {
       const row = document.createElement("div");
@@ -96,37 +110,56 @@ function pintarCartones(cartones) {
 }
 
 // =======================
-// CARGAR JUGADOR
+// INICIAR JUEGO
 // =======================
 async function iniciarJuego() {
-  const userRef = doc(db, "players", currentUser);
-  const snap = await getDoc(userRef);
+  try {
+    const currentUser = getCurrentUser();
 
-  if (!snap.exists()) {
-    alert("Jugador no encontrado");
-    return;
+    if (!currentUser) {
+      alert("Usuario no válido");
+      return;
+    }
+
+    const userRef = doc(db, "players", currentUser);
+    const snap = await getDoc(userRef);
+
+    if (!snap.exists()) {
+      alert("Jugador no encontrado");
+      return;
+    }
+
+    const data = snap.data();
+
+    const nameEl = document.getElementById("player-name");
+    if (nameEl) {
+      nameEl.textContent = `Jugador: ${data.username}`;
+    }
+
+    // Si ya existen cartones, usarlos
+    if (Array.isArray(data.cartones) && data.cartones.length > 0) {
+      pintarCartones(data.cartones);
+      return;
+    }
+
+    // Generar cartones según numCartones
+    const cantidad = Number(data.numCartones) || 0;
+    if (cantidad <= 0) {
+      alert("No tienes cartones asignados");
+      return;
+    }
+
+    const cartones = [];
+    for (let i = 0; i < cantidad; i++) {
+      cartones.push(generarCarton());
+    }
+
+    // Guardar cartones para que no cambien
+    await setDoc(userRef, { cartones }, { merge: true });
+
+    pintarCartones(cartones);
+
+  } catch (err) {
+    console.error("🔥 Error en iniciarJuego:", err);
   }
-
-  const data = snap.data();
-  document.getElementById("player-name").textContent =
-    `Jugador: ${data.username}`;
-
-  // 🔑 Si ya tiene cartones, usarlos
-  if (data.cartones && data.cartones.length > 0) {
-    pintarCartones(data.cartones);
-    return;
-  }
-
-  // 🔥 Generar cartones según cantidad asignada
-  const cartones = [];
-  for (let i = 0; i < data.numCartones; i++) {
-    cartones.push(generarCarton());
-  }
-
-  // Guardarlos para que no cambien
-  await setDoc(userRef, { cartones }, { merge: true });
-
-  pintarCartones(cartones);
 }
-
-iniciarJuego();
