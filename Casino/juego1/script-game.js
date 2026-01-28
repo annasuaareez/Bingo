@@ -6,6 +6,8 @@ import {
   getDoc,
   setDoc
 } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+import { onSnapshot } from
+"https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
 import { app } from "../../firebase.js";
 
@@ -15,7 +17,9 @@ const db = getFirestore(app);
 // ESPERAR AL DOM
 // =======================
 document.addEventListener("DOMContentLoaded", () => {
+  crearPanelNumeros();
   iniciarJuego();
+  escucharJuego();
 });
 
 // =======================
@@ -32,7 +36,7 @@ function getCurrentUser() {
 function generarCarton() {
   const ranges = [
     [1, 9], [10, 19], [20, 29], [30, 39],
-    [40, 49], [50, 59], [60, 69], [70, 79], [80, 90]
+    [40, 49]
   ];
 
   let card = Array.from({ length: 3 }, () => Array(9).fill(null));
@@ -171,4 +175,20 @@ async function iniciarJuego() {
   } catch (err) {
     console.error("🔥 Error en iniciarJuego:", err);
   }
+}
+
+function escucharJuego() {
+  onSnapshot(doc(db, "game", "gameState"), snap => {
+    if (!snap.exists()) return;
+
+    const data = snap.data();
+
+    document.getElementById("numero-cantado").textContent =
+      data.numeroActual || "";
+
+    (data.numerosSalidos || []).forEach(n => {
+      const el = document.getElementById(`num-${n}`);
+      if (el) el.classList.add("tachado");
+    });
+  });
 }

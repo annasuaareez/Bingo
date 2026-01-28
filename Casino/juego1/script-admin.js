@@ -35,50 +35,36 @@ window.loginAdmin = async function () {
   document.getElementById("login").style.display = "none";
   document.getElementById("panel").style.display = "block";
 
+  crearPanelNumeros();
+  escucharJuego();
   escucharJugadores();
 };
 
-// GENERAR CARTÓN
-function generarCarton() {
-  const ranges = [
-    [1,9],[10,19],[20,29],[30,39],
-    [40,49],[50,59],[60,69],[70,79],[80,90]
-  ];
-
-  let card = Array.from({ length: 3 }, () => Array(9).fill(null));
-  let used = new Set();
-
-  for (let col = 0; col < 9; col++) {
-    let nums = [];
-    while (nums.length < 2) {
-      let n = Math.floor(Math.random() * (ranges[col][1] - ranges[col][0] + 1)) + ranges[col][0];
-      if (!used.has(n)) {
-        used.add(n);
-        nums.push(n);
-      }
-    }
-
-    nums.forEach(n => {
-      let row;
-      do {
-        row = Math.floor(Math.random() * 3);
-      } while (card[row][col] !== null);
-      card[row][col] = n;
-    });
+function crearPanelNumeros() {
+  const panel = document.getElementById("panel-numeros");
+  panel.innerHTML = "";
+  for (let i = 1; i <= 49; i++) {
+    const d = document.createElement("div");
+    d.id = `num-${i}`;
+    d.className = "numero";
+    d.textContent = i;
+    panel.appendChild(d);
   }
+}
 
-  card.forEach(row => {
-    while (row.filter(n => n !== null).length > 5) {
-      row[Math.floor(Math.random() * 9)] = null;
-    }
+function escucharJuego() {
+  onSnapshot(doc(db, "game", "gameState"), snap => {
+    if (!snap.exists()) return;
+    const data = snap.data();
+
+    document.getElementById("numero-cantado").textContent =
+      data.numeroActual || "";
+
+    (data.numerosSalidos || []).forEach(n => {
+      const el = document.getElementById(`num-${n}`);
+      if (el) el.classList.add("tachado");
+    });
   });
-
-  // 🔥 SOLO OBJETOS
-  return {
-    f1: card[0],
-    f2: card[1],
-    f3: card[2]
-  };
 }
 
 // ESCUCHAR JUGADORES
@@ -89,7 +75,8 @@ function escucharJugadores() {
     cont.innerHTML = "";
     snapshot.forEach(docSnap => {
       const p = docSnap.data();
-      if (p.estado==="finalizado") return;
+      // 🔥 NO mostrar jugadores en espera ni finalizados
+      if (p.estado === "espera" || p.estado === "finalizado") return;
 
       const div = document.createElement("div");
       div.style.border="1px solid #999";
@@ -116,6 +103,49 @@ function escucharJugadores() {
   });
 }
 
+// GENERAR CARTÓN
+function generarCarton() {
+  const ranges = [
+    [1,9],[10,19],[20,29],[30,39],
+    [40,49]
+  ];
+
+  let card = Array.from({ length: 3 }, () => Array(7).fill(null));
+  let used = new Set();
+
+  for (let col = 0; col < 7; col++) {
+    let nums = [];
+    while (nums.length < 2) {
+      let n = Math.floor(Math.random() * (ranges[col][1] - ranges[col][0] + 1)) + ranges[col][0];
+      if (!used.has(n)) {
+        used.add(n);
+        nums.push(n);
+      }
+    }
+
+    nums.forEach(n => {
+      let row;
+      do {
+        row = Math.floor(Math.random() * 3);
+      } while (card[row][col] !== null);
+      card[row][col] = n;
+    });
+  }
+
+  card.forEach(row => {
+    while (row.filter(n => n !== null).length > 5) {
+      row[Math.floor(Math.random() * 7)] = null;
+    }
+  });
+
+  // 🔥 SOLO OBJETOS
+  return {
+    f1: card[0],
+    f2: card[1],
+    f3: card[2]
+  };
+}
+
 // ASIGNAR CARTONES
 window.asignarCartones = async function(username) {
   const select = document.getElementById(`sel-${username}`);
@@ -134,14 +164,10 @@ window.iniciarPartida = async function () {
     const p = docSnap.data();
 
     if ((p.estado === "espera" || p.estado === "jugando") && p.numCartones > 0) {
-      const cartones = [];
-
-      for (let i = 0; i < p.numCartones; i++) {
-        cartones.push(generarCarton()); // ← objeto
-      }
-
+      
       await updateDoc(doc(db, "players", docSnap.id), {
-        estado: "jugando"
+        estado: "jugando",
+        cartones
       });
     }
   }
@@ -149,37 +175,30 @@ window.iniciarPartida = async function () {
   // 🔥 Actualizar estado global
   await setDoc(doc(db, "game", "gameState"), {
     estado: "jugando",
+    numerosSalidos: [],
     startedAt: serverTimestamp()
   });
 
   alert("Partida iniciada");
 };
 
-// BOMBO DE NÚMEROS
-async function mostrarNumeros(){
-  const todosNumeros=Array.from({length:39},(_,i)=>i+1);
-  let numerosDisponibles=[...todosNumeros];
-  const cont=document.getElementById("numero-cantado");
+window.iniciarBombo = async function () {
+  let disponibles = Array.from({ length: 49 }, (_, i) => i + 1);
+  let salidos = [];
 
-  for(let i=0;i<39;i++){
-    if(numerosDisponibles.length===0) break;
-    const index=Math.floor(Math.random()*numerosDisponibles.length);
-    const numero=numerosDisponibles[index];
-    numerosDisponibles.splice(index,1);
+  while (disponibles.length) {
+    const n = disponibles.splice(
+      Math.floor(Math.random() * disponibles.length), 1
+    )[0];
 
-    cont.textContent=numero;
-    await new Promise(res=>setTimeout(res,2000));
-    cont.textContent="";
+    salidos.push(n);
+
+    await updateDoc(doc(db, "game", "gameState"), {
+      numeroActual: n,
+      numerosSalidos: salidos
+    });
+
+    await new Promise(r => setTimeout(r, 2000));
   }
+};
 
-  cont.textContent="Bingo terminado";
-
-  // Cambiar estado a finalizado
-  const snapshot=await getDocs(collection(db,"players"));
-  snapshot.forEach(async docSnap=>{
-    const p=docSnap.data();
-    if(p.estado==="jugando"){
-      await updateDoc(doc(db,"players",p.username),{estado:"finalizado"});
-    }
-  });
-}

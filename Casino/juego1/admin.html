@@ -5,40 +5,37 @@
   <title>Admin Bingo | Alchemic Order</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Google Font -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-
   <link rel="stylesheet" href="styles_Bingo.css">
 </head>
 <body>
 
 <section class="admin-hero">
 
-  <!-- NAVBAR -->
   <div class="navbar">
     <div class="logo">Alchemic Order</div>
     <nav class="menu">
       <a href="./index.html">Home</a>
       <a href="#">Postulaciones</a>
-      <a href="index.html">Casino</a>
+      <a href="#">Casino</a>
       <a href="#">Miembros</a>
     </nav>
   </div>
 
-  <!-- LOGIN ADMIN -->
-   <div class="admin-content">
-      <div class="admin-card" id="login">
-        <span class="subtitle">Control Panel</span>
-        <h2>Admin Bingo</h2>
+  <!-- LOGIN -->
+  <div class="admin-content">
+    <div class="admin-card" id="login">
+      <span class="subtitle">Control Panel</span>
+      <h2>Admin Bingo</h2>
 
-        <input id="adminUser" placeholder="Usuario">
-        <input id="adminPass" type="password" placeholder="Contraseña">
+      <input id="adminUser" placeholder="Usuario">
+      <input id="adminPass" type="password" placeholder="Contraseña">
 
-        <button onclick="loginAdmin()">Entrar</button>
-      </div>
-   </div>
+      <button onclick="loginAdmin()">Entrar</button>
+    </div>
+  </div>
 
-  <!-- PANEL ADMIN -->
+  <!-- PANEL -->
   <div class="admin-panel" id="panel" style="display:none">
 
     <div class="panel-grid">
@@ -53,26 +50,22 @@
         <span class="subtitle">En juego</span>
         <h3>Número Cantado</h3>
         <div id="numero-cantado" class="numero-cantado"></div>
+        <div id="panel-numeros" class="panel-numeros"></div>
       </div>
 
       <div class="panel-card">
-        <span class="subtitle">Solicitudes</span>
-        <h3>Validaciones</h3>
-        <div id="validaciones"></div>
+        <span class="subtitle">Estado</span>
+        <h3>Control</h3>
+        <button onclick="iniciarPartida()">Iniciar Partida</button>
+        <button onclick="iniciarBombo()">Iniciar Bombo</button>
       </div>
 
-    </div>
-
-    <div class="panel-actions">
-      <button onclick="iniciarPartida()">Iniciar Partida</button>
-      <button class="secondary" onclick="reiniciar()">Reiniciar</button>
     </div>
 
   </div>
 
 </section>
 
-<script type="module" src="../../firebase.js"></script>
 <script type="module" src="script-admin.js"></script>
 </body>
 </html>

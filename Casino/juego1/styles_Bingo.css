@@ -310,3 +310,32 @@ button.secondary {
 .celda:hover:not(.vacia):not(.marcada) {
   background: rgba(44, 123, 229, 0.6);
 }
+
+.numero-cantado {
+  font-size: 48px;
+  font-weight: 800;
+  margin: 20px 0;
+  text-align: center;
+}
+
+.panel-numeros {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.numero {
+  padding: 10px;
+  background: #222;
+  border: 1px solid #444;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.numero.tachado {
+  background: #555;
+  color: #aaa;
+  text-decoration: line-through;
+}
