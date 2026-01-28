@@ -32,12 +32,24 @@ window.loginAdmin = async function () {
 // ESCUCHAR JUGADORES (solo jugadores activos)
 function escucharJugadores() {
   const cont = document.getElementById("players");
+  const gameRef = doc(db, "game", "gameState");
 
-  onSnapshot(collection(db, "players"), snapshot => {
+  // Escuchar cambios en la partida
+  onSnapshot(gameRef, async (gameSnap) => {
+    const gameData = gameSnap.data();
+    const gameEstado = gameData?.estado;
+
+    const playersSnapshot = await getDocs(collection(db, "players"));
     cont.innerHTML = "";
-    snapshot.forEach(docSnap => {
+
+    playersSnapshot.forEach(docSnap => {
       const p = docSnap.data();
-      if (p.estado !== "jugando") return;
+
+      // Solo mostrar jugadores si el juego NO está en curso
+      if (gameEstado === "jugando") return;
+
+      // Solo mostrar jugadores que estén en "espera"
+      if (p.estado !== "espera") return;
 
       const div = document.createElement("div");
       div.style.border="1px solid #999";
@@ -62,6 +74,7 @@ function escucharJugadores() {
     });
   });
 }
+
 
 // ASIGNAR CARTONES
 window.asignarCartones = async function(username) {
