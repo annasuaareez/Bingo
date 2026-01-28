@@ -1,4 +1,6 @@
-import { getFirestore, doc, setDoc, updateDoc, collection, onSnapshot, getDocs, arrayUnion, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+import { 
+  getFirestore, doc, setDoc, updateDoc, collection, onSnapshot, getDocs, arrayUnion, serverTimestamp 
+} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 import { app } from "../../firebase.js";
 
 const db = getFirestore(app);
@@ -7,7 +9,11 @@ const db = getFirestore(app);
 const ADMINS = ["annasuaareez", "loveealchemist"];
 const ADMIN_PASS = "admin123";
 
+let gameEstado = "finalizado"; // Estado global
+
+// ========================
 // LOGIN ADMIN
+// ========================
 window.loginAdmin = async function () {
   const rawUser = document.getElementById("adminUser").value;
   const pass = document.getElementById("adminPass").value;
@@ -16,7 +22,6 @@ window.loginAdmin = async function () {
   if (!ADMINS.includes(user)) return alert("Usuario no autorizado");
   if (pass !== ADMIN_PASS) return alert("Contraseña incorrecta");
 
-  // Guardar admin en Firestore
   await setDoc(doc(db, "admins", user), {
     username: user,
     conectado: true,
@@ -26,78 +31,105 @@ window.loginAdmin = async function () {
   document.getElementById("login").style.display = "none";
   document.getElementById("panel").style.display = "block";
 
+  escucharJuego();
   escucharJugadores();
 };
 
-// ESCUCHAR JUGADORES (solo jugadores activos)
-function escucharJugadores() {
-  const cont = document.getElementById("players");
+// ========================
+// ESCUCHAR ESTADO GLOBAL DEL JUEGO
+// ========================
+function escucharJuego() {
   const gameRef = doc(db, "game", "gameState");
 
-  // Escuchar cambios en la partida
-  onSnapshot(gameRef, async (gameSnap) => {
-    const gameData = gameSnap.data();
-    const gameEstado = gameData?.estado;
+  onSnapshot(gameRef, snap => {
+    const data = snap.data();
+    if (!data) return;
 
-    const playersSnapshot = await getDocs(collection(db, "players"));
-    cont.innerHTML = "";
+    gameEstado = data.estado;
+    document.getElementById("estado-juego").textContent = `Estado: ${gameEstado}`;
+  });
+}
 
-    playersSnapshot.forEach(docSnap => {
+// ========================
+// ESCUCHAR JUGADORES
+// ========================
+function escucharJugadores() {
+  const playersCont = document.getElementById("players");
+
+  onSnapshot(collection(db, "players"), async snapshot => {
+    playersCont.innerHTML = "";
+
+    snapshot.forEach(docSnap => {
       const p = docSnap.data();
 
-      // Solo mostrar jugadores si el juego NO está en curso
-      if (gameEstado === "jugando") return;
-
-      // Solo mostrar jugadores que estén en "espera"
-      if (p.estado !== "espera") return;
-
       const div = document.createElement("div");
-      div.style.border="1px solid #999";
-      div.style.padding="8px";
-      div.style.marginBottom="8px";
+      div.style.border = "1px solid #999";
+      div.style.padding = "8px";
+      div.style.marginBottom = "8px";
 
-      div.innerHTML = `
-        <strong>${p.username}</strong><br>
-        Cartones asignados: ${p.numCartones||0}<br><br>
+      // Jugadores que ya están jugando
+      if (p.estado === "jugando") {
+        div.innerHTML = `
+          <strong>${p.username}</strong><br>
+          Cartones asignados: ${p.numCartones || 0}<br>
+          <em>Jugando actualmente</em>
+        `;
+        playersCont.appendChild(div);
+        return;
+      }
 
-        <select id="sel-${p.username}">
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-          <option value="4">4</option>
-          <option value="5">5</option>
-        </select>
+      // Jugadores en espera solo si no hay partida en curso
+      if (p.estado === "espera" && gameEstado !== "jugando") {
+        div.innerHTML = `
+          <strong>${p.username}</strong><br>
+          Cartones asignados: ${p.numCartones || 0}<br><br>
 
-        <button onclick="asignarCartones('${p.username}')">Asignar cartones</button>
-      `;
-      cont.appendChild(div);
+          <select id="sel-${p.username}">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
+
+          <button onclick="asignarCartones('${p.username}')">Asignar cartones</button>
+        `;
+        playersCont.appendChild(div);
+      }
     });
   });
 }
 
-
+// ========================
 // ASIGNAR CARTONES
+// ========================
 window.asignarCartones = async function(username) {
   const select = document.getElementById(`sel-${username}`);
   const num = parseInt(select.value);
+
   await updateDoc(doc(db, "players", username), {
     numCartones: num,
-    estado: "espera"
+    estado: "espera" // Mantener en espera hasta iniciar partida
   });
 };
 
+// ========================
 // INICIAR PARTIDA
+// ========================
 window.iniciarPartida = async function () {
+  if (gameEstado === "jugando") return alert("Ya hay una partida en curso");
+
   const snapshot = await getDocs(collection(db, "players"));
 
+  // Solo actualizar estado de jugadores que tienen cartones asignados
   for (const docSnap of snapshot.docs) {
     const p = docSnap.data();
-    if ((p.estado === "espera" || p.estado === "jugando") && p.numCartones > 0) {
+    if ((p.estado === "espera") && p.numCartones > 0) {
       await updateDoc(doc(db, "players", docSnap.id), { estado: "jugando" });
     }
   }
 
-  // Estado global del juego
+  // Crear estado global del juego
   await setDoc(doc(db, "game", "gameState"), {
     estado: "jugando",
     startedAt: serverTimestamp(),
@@ -109,7 +141,9 @@ window.iniciarPartida = async function () {
   alert("Partida iniciada");
 };
 
+// ========================
 // BOMBO DE NÚMEROS
+// ========================
 async function iniciarBombo() {
   const gameRef = doc(db, "game", "gameState");
   const todosNumeros = Array.from({ length: 39 }, (_, i) => i + 1);
@@ -128,13 +162,14 @@ async function iniciarBombo() {
     await new Promise(res => setTimeout(res, 2000));
   }
 
+  // Finalizar partida
   await updateDoc(gameRef, { estado: "finalizado", numeroActual: null });
 
   const snapshot = await getDocs(collection(db, "players"));
-  snapshot.forEach(async docSnap => {
+  for (const docSnap of snapshot.docs) {
     const p = docSnap.data();
     if (p.estado === "jugando") {
-      await updateDoc(doc(db, "players", p.username), { estado: "finalizado" });
+      await updateDoc(doc(db, "players", docSnap.id), { estado: "finalizado" });
     }
-  });
+  }
 }
