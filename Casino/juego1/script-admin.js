@@ -146,6 +146,12 @@ window.iniciarPartida = async function () {
     }
   }
 
+  // 🔥 Actualizar estado global
+  await setDoc(doc(db, "game", "gameState"), {
+    estado: "jugando",
+    startedAt: serverTimestamp()
+  });
+
   alert("Partida iniciada");
 };
 
