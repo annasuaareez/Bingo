@@ -2,27 +2,49 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Bingo – Juego</title>
+  <title>Bingo | Alchemic Order</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="styles_Bingo.css">
 </head>
 <body>
 
-  <div class="container" id="game-container">
-    <h1>Bingo</h1>
+<section class="bingo-hero">
 
-    <p id="player-name"></p>
-
-    <div id="cartones-container"></div>
-
-    <div id="numero-cantado" class="numero-cantado"></div>
-
-    <button id="btn-linea" disabled>Línea</button>
-    <button id="btn-bingo" disabled>Bingo</button>
+  <!-- NAVBAR -->
+  <div class="navbar">
+    <div class="logo">Alchemic Order</div>
+    <nav class="menu">
+      <a href="./index.html">Home</a>
+      <a href="#">Bingo</a>
+      <a href="#">Casino</a>
+      <a href="#">Miembros</a>
+    </nav>
   </div>
 
-  <!-- SCRIPT DEL JUEGO -->
-  <script type="module" src="script-game.js"></script>
+  <!-- CONTENIDO JUGADOR -->
+  <div class="bingo-content">
+
+    <div class="bingo-card" id="player-info">
+      <span class="subtitle">Jugador</span>
+      <h2 id="player-name">Cargando...</h2>
+
+      <div id="cartones-container"></div>
+
+      <div id="numero-cantado" class="numero-cantado"></div>
+
+      <button id="btn-linea" disabled>Línea</button>
+      <button id="btn-bingo" disabled>Bingo</button>
+    </div>
+
+  </div>
+
+</section>
+
+<!-- SCRIPT DEL JUEGO -->
+<script type="module" src="script-game.js"></script>
 </body>
 </html>
