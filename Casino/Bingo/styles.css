@@ -1,0 +1,110 @@
+body {
+  font-family: Arial;
+  background: #eee;
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+}
+
+/* Loader */
+.loader {
+  border: 8px solid #f3f3f3;
+  border-top: 8px solid #4caf50;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  margin: 20px auto;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg);}
+  100% { transform: rotate(360deg);}
+}
+
+.admin-btn {
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  background: #222;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 14px;
+  z-index: 1000;
+}
+
+.admin-btn:hover {
+  background: #444;
+}
+
+.container {
+  background: white;
+  padding: 20px;
+  width: 450px;
+}
+
+input, button {
+  width: 100%;
+  margin: 5px 0;
+  padding: 8px;
+}
+
+.carton {
+  display: inline-block;
+  border: 3px solid #2c7be5;
+  border-radius: 6px;
+  padding: 6px;
+  margin: 10px;
+  background: #f8fbff;
+}
+
+.fila {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+}
+
+.celda {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #2c7be5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 15px;
+  cursor: pointer;
+  background: white;
+}
+
+.celda.vacia {
+  background: #e9ecef;
+  cursor: default;
+}
+
+.celda.marcada {
+  background: #28a745;
+  color: white;
+}
+
+.numero-cantado {
+  font-size: 48px;
+  margin: 20px;
+}
+
+.admin-view {
+  pointer-events: none;
+  opacity: 0.9;
+}
+
+.admin-card-wrapper {
+  margin-bottom: 15px;
+}
+
+.admin-card-title {
+  font-weight: bold;
+  margin: 5px 0;
+  font-size: 14px;
+  color: #333;
+}

@@ -1,0 +1,237 @@
+/* =========================
+   RESET & BASE
+========================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Montserrat', sans-serif;
+}
+
+body {
+  background: #111;
+  color: #fff;
+}
+
+/* =========================
+   HERO BASE (Bingo + Admin)
+========================= */
+.bingo-hero,
+.admin-hero {
+  min-height: 100vh;
+  padding: 40px 80px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* FONDOS */
+.bingo-hero {
+  background:
+    linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.7)),
+    url("https://images.unsplash.com/photo-1501785888041-af3ef285b470")
+    center/cover no-repeat;
+}
+
+.admin-hero {
+  background:
+    linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.75)),
+    url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee")
+    center/cover no-repeat;
+}
+
+.admin-content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* =========================
+   NAVBAR (GLOBAL)
+========================= */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 80px;
+}
+
+.logo {
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-size: 14px;
+}
+
+.menu {
+  display: flex;
+  gap: 30px;
+  font-size: 13px;
+}
+
+.menu a {
+  position: relative;
+  color: #fff;
+  text-decoration: none;
+  text-transform: uppercase;
+  padding-bottom: 4px;
+}
+
+.menu a::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 0;
+  height: 1px;
+  background: #fff;
+  transform: translateX(-50%);
+  transition: 0.3s;
+}
+
+.menu a:hover::after,
+.menu a.active::after {
+  width: 100%;
+}
+
+/* =========================
+   CONTENEDORES
+========================= */
+.bingo-content,
+.panel-actions {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+}
+
+.bingo-content {
+  flex: 1;
+  align-items: center;
+}
+
+/* =========================
+   CARDS (REUTILIZABLE)
+========================= */
+.bingo-card,
+.admin-card,
+.panel-card {
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+}
+
+.bingo-card,
+.admin-card {
+  width: 380px;
+  padding: 40px;
+  text-align: center;
+}
+
+.panel-card {
+  padding: 30px;
+}
+
+/* =========================
+   TEXTOS
+========================= */
+.subtitle {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+h2 {
+  font-size: 26px;
+  font-weight: 700;
+  margin: 15px 0 30px;
+}
+
+h3 {
+  font-size: 18px;
+  margin: 10px 0 20px;
+}
+
+/* =========================
+   INPUTS
+========================= */
+input {
+  width: 100%;
+  padding: 14px;
+  margin-bottom: 15px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.4);
+  border-radius: 8px;
+  color: #fff;
+}
+
+input::placeholder {
+  color: rgba(255,255,255,0.6);
+}
+
+/* =========================
+   BUTTONS
+========================= */
+button {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #fff;
+  background: transparent;
+  color: #fff;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: #fff;
+  color: #000;
+}
+
+button.secondary {
+  border-color: rgba(255,255,255,0.4);
+  opacity: 0.7;
+}
+
+/* =========================
+   ADMIN PANEL
+========================= */
+.admin-panel {
+  margin-top: 40px;
+}
+
+.panel-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+}
+
+.panel-card.center {
+  text-align: center;
+}
+
+.numero-cantado {
+  font-size: 64px;
+  font-weight: 800;
+  margin-top: 20px;
+}
+
+/* =========================
+   LOADER
+========================= */
+.loader {
+  border: 6px solid rgba(255,255,255,0.2);
+  border-top: 6px solid #fff;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  margin: 30px auto 0;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

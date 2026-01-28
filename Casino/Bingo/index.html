@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Bingo | Alchemic Order</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles_Bingo.css">
+</head>
+<body>
+
+<section class="bingo-hero">
+
+  <!-- NAVBAR -->
+  <div class="navbar">
+    <div class="logo">Alchemic Order</div>
+    <nav class="menu">
+      <a href="/index.html">Home</a>
+      <a href="#">Postulaciones</a>
+      <a href="/Casino/Bingo/index.html">Casino</a>
+      <a href="#">Miembros</a>
+      <a href="/Casino/Bingo/admin.html">Admin</a>
+    </nav>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="bingo-content">
+
+    <div class="bingo-card" id="login-container">
+      <span class="subtitle">Casino · Bingo</span>
+      <h2>Ingresar al Bingo</h2>
+      <input type="text" id="username" placeholder="Nombre de usuario">
+      <button onclick="entrar()">Entrar</button>
+    </div>
+
+    <div class="bingo-card" id="loading-container" style="display:none">
+      <span class="subtitle">Esperando</span>
+      <h2>El administrador iniciará la partida</h2>
+      <div class="loader"></div>
+    </div>
+
+  </div>
+
+</section>
+
+<script type="module" src="firebase.js"></script>
+<script type="module" src="script-user.js"></script>
+</body>
+</html>
