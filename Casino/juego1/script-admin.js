@@ -1,13 +1,4 @@
-import {
-  getFirestore,
-  doc,
-  setDoc,
-  updateDoc,
-  collection,
-  onSnapshot,
-  getDocs,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, updateDoc, collection, onSnapshot, getDocs, arrayUnion, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 import { app } from "../../firebase.js";
 
 const db = getFirestore(app);
@@ -35,39 +26,10 @@ window.loginAdmin = async function () {
   document.getElementById("login").style.display = "none";
   document.getElementById("panel").style.display = "block";
 
-  crearPanelNumeros();
-  escucharJuego();
   escucharJugadores();
 };
 
-function crearPanelNumeros() {
-  const panel = document.getElementById("panel-numeros");
-  panel.innerHTML = "";
-  for (let i = 1; i <= 49; i++) {
-    const d = document.createElement("div");
-    d.id = `num-${i}`;
-    d.className = "numero";
-    d.textContent = i;
-    panel.appendChild(d);
-  }
-}
-
-function escucharJuego() {
-  onSnapshot(doc(db, "game", "gameState"), snap => {
-    if (!snap.exists()) return;
-    const data = snap.data();
-
-    document.getElementById("numero-cantado").textContent =
-      data.numeroActual || "";
-
-    (data.numerosSalidos || []).forEach(n => {
-      const el = document.getElementById(`num-${n}`);
-      if (el) el.classList.add("tachado");
-    });
-  });
-}
-
-// ESCUCHAR JUGADORES
+// ESCUCHAR JUGADORES (solo jugadores activos)
 function escucharJugadores() {
   const cont = document.getElementById("players");
 
@@ -75,8 +37,7 @@ function escucharJugadores() {
     cont.innerHTML = "";
     snapshot.forEach(docSnap => {
       const p = docSnap.data();
-      // 🔥 NO mostrar jugadores en espera ni finalizados
-      if (p.estado === "espera" || p.estado === "finalizado") return;
+      if (p.estado !== "jugando") return;
 
       const div = document.createElement("div");
       div.style.border="1px solid #999";
@@ -97,53 +58,9 @@ function escucharJugadores() {
 
         <button onclick="asignarCartones('${p.username}')">Asignar cartones</button>
       `;
-
       cont.appendChild(div);
     });
   });
-}
-
-// GENERAR CARTÓN
-function generarCarton() {
-  const ranges = [
-    [1,9],[10,19],[20,29],[30,39],
-    [40,49]
-  ];
-
-  let card = Array.from({ length: 3 }, () => Array(7).fill(null));
-  let used = new Set();
-
-  for (let col = 0; col < 7; col++) {
-    let nums = [];
-    while (nums.length < 2) {
-      let n = Math.floor(Math.random() * (ranges[col][1] - ranges[col][0] + 1)) + ranges[col][0];
-      if (!used.has(n)) {
-        used.add(n);
-        nums.push(n);
-      }
-    }
-
-    nums.forEach(n => {
-      let row;
-      do {
-        row = Math.floor(Math.random() * 3);
-      } while (card[row][col] !== null);
-      card[row][col] = n;
-    });
-  }
-
-  card.forEach(row => {
-    while (row.filter(n => n !== null).length > 5) {
-      row[Math.floor(Math.random() * 7)] = null;
-    }
-  });
-
-  // 🔥 SOLO OBJETOS
-  return {
-    f1: card[0],
-    f2: card[1],
-    f3: card[2]
-  };
 }
 
 // ASIGNAR CARTONES
@@ -162,43 +79,49 @@ window.iniciarPartida = async function () {
 
   for (const docSnap of snapshot.docs) {
     const p = docSnap.data();
-
     if ((p.estado === "espera" || p.estado === "jugando") && p.numCartones > 0) {
-      
-      await updateDoc(doc(db, "players", docSnap.id), {
-        estado: "jugando",
-        cartones
-      });
+      await updateDoc(doc(db, "players", docSnap.id), { estado: "jugando" });
     }
   }
 
-  // 🔥 Actualizar estado global
+  // Estado global del juego
   await setDoc(doc(db, "game", "gameState"), {
     estado: "jugando",
-    numerosSalidos: [],
-    startedAt: serverTimestamp()
+    startedAt: serverTimestamp(),
+    numeroActual: null,
+    numerosSalidos: []
   });
 
+  iniciarBombo();
   alert("Partida iniciada");
 };
 
-window.iniciarBombo = async function () {
-  let disponibles = Array.from({ length: 49 }, (_, i) => i + 1);
-  let salidos = [];
+// BOMBO DE NÚMEROS
+async function iniciarBombo() {
+  const gameRef = doc(db, "game", "gameState");
+  const todosNumeros = Array.from({ length: 39 }, (_, i) => i + 1);
+  let numerosDisponibles = [...todosNumeros];
 
-  while (disponibles.length) {
-    const n = disponibles.splice(
-      Math.floor(Math.random() * disponibles.length), 1
-    )[0];
+  while (numerosDisponibles.length > 0) {
+    const index = Math.floor(Math.random() * numerosDisponibles.length);
+    const numero = numerosDisponibles[index];
+    numerosDisponibles.splice(index, 1);
 
-    salidos.push(n);
-
-    await updateDoc(doc(db, "game", "gameState"), {
-      numeroActual: n,
-      numerosSalidos: salidos
+    await updateDoc(gameRef, {
+      numeroActual: numero,
+      numerosSalidos: arrayUnion(numero)
     });
 
-    await new Promise(r => setTimeout(r, 2000));
+    await new Promise(res => setTimeout(res, 2000));
   }
-};
 
+  await updateDoc(gameRef, { estado: "finalizado", numeroActual: null });
+
+  const snapshot = await getDocs(collection(db, "players"));
+  snapshot.forEach(async docSnap => {
+    const p = docSnap.data();
+    if (p.estado === "jugando") {
+      await updateDoc(doc(db, "players", p.username), { estado: "finalizado" });
+    }
+  });
+}
