@@ -35,8 +35,14 @@ async function iniciarJuego() {
   const gameRef = doc(db, "game", "gameState");
   const gameSnap = await getDoc(gameRef);
   const gameData = gameSnap.data();
-  if (gameData?.estado === "jugando" && data.estado !== "jugando") {
-    alert("La partida ya está en curso. Espera la próxima partida.");
+
+  if (gameData?.estado === "jugando") {
+    // Cambiar el estado a espera_partida
+    if (data.estado !== "jugando") {
+      await updateDoc(userRef, { estado: "espera_partida" });
+    }
+    document.getElementById("player-name").textContent = `Jugador: ${data.username}`;
+    document.getElementById("cartones-container").innerHTML = "<p>La partida está en curso. Espera a la siguiente.</p>";
     return;
   }
 

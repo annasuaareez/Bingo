@@ -123,11 +123,22 @@ window.iniciarPartida = async function () {
 
   // Solo actualizar estado de jugadores que tienen cartones asignados
   for (const docSnap of snapshot.docs) {
-    const p = docSnap.data();
-    if ((p.estado === "espera") && p.numCartones > 0) {
-      await updateDoc(doc(db, "players", docSnap.id), { estado: "jugando" });
+  const p = docSnap.data();
+  const userRef = doc(db, "players", docSnap.id);
+
+  if ((p.estado === "espera") && p.numCartones > 0) {
+    // Generar cartones si no existen
+    if (!Array.isArray(p.cartones) || p.cartones.length === 0) {
+      const cartones = [];
+      for (let i = 0; i < p.numCartones; i++) {
+        cartones.push(generarCarton());
+      }
+      await setDoc(userRef, { cartones, estado: "jugando" }, { merge: true });
+    } else {
+      await updateDoc(userRef, { estado: "jugando" });
     }
   }
+}
 
   // Crear estado global del juego
   await setDoc(doc(db, "game", "gameState"), {
