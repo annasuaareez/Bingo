@@ -152,6 +152,46 @@ window.iniciarPartida = async function () {
   alert("Partida iniciada");
 };
 
+function generarCarton() {
+  const ranges = [
+    [1, 9], [10, 19], [20, 29],
+    [30, 39], [40, 49], [50, 59],
+    [60, 69], [70, 79], [80, 90]
+  ];
+
+  let card = Array.from({ length: 3 }, () => Array(9).fill(null));
+  let used = new Set();
+
+  for (let col = 0; col < 9; col++) {
+    let nums = [];
+    while (nums.length < 2) {
+      const n = Math.floor(Math.random() *
+        (ranges[col][1] - ranges[col][0] + 1)) + ranges[col][0];
+      if (!used.has(n)) {
+        used.add(n);
+        nums.push(n);
+      }
+    }
+
+    nums.forEach(n => {
+      let row;
+      do {
+        row = Math.floor(Math.random() * 3);
+      } while (card[row][col] !== null);
+      card[row][col] = n;
+    });
+  }
+
+  card.forEach(row => {
+    while (row.filter(n => n !== null).length > 5) {
+      row[Math.floor(Math.random() * 9)] = null;
+    }
+  });
+
+  return { f1: card[0], f2: card[1], f3: card[2] };
+}
+
+
 // ========================
 // BOMBO DE NÚMEROS
 // ========================
